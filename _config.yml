@@ -28,12 +28,12 @@ search_full_content       : true #, false (default)
 # Site Author
 author:
   name                    : "Paweł Sygnowski"
-  avatar                  : "/assets/images/ninja.jpg"
+  avatar                  : "/assets/images/photo.jpg"
   bio                     : ".NET Developer / Architect"
   location                : "Warsaw"
   links:
     - label: "Email"
-      icon: "fas fa-fw fa-envelope-square"
+      icon: "fas fa-fw fa-envelope"
       url: mailto:sygnowski.p@gmail.com
     - label: "Website"
       icon: "fas fa-fw fa-link"
@@ -41,6 +41,9 @@ author:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/sygnowskip"
+    - label: "LinkedIn"
+      icon: "fab fa-fw fa-linkedin"
+      url: "https://www.linkedin.com/in/pawe%C5%82-sygnowski-01162b83/"
 
 
 # Site Footer
@@ -49,6 +52,9 @@ footer:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/sygnowskip"
+    - label: "LinkedIn"
+      icon: "fab fa-fw fa-linkedin"
+      url: "https://www.linkedin.com/in/pawe%C5%82-sygnowski-01162b83/"
 
 # Conversion
 markdown: kramdown

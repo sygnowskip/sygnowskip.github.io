@@ -121,6 +121,8 @@ GEM
     jekyll-github-metadata (2.12.1)
       jekyll (~> 3.4)
       octokit (~> 4.0, != 4.4.0)
+    jekyll-include-cache (0.2.0)
+      jekyll (>= 3.7, < 5.0)
     jekyll-mentions (1.4.1)
       html-pipeline (~> 2.3)
       jekyll (~> 3.0)
@@ -244,6 +246,13 @@ PLATFORMS
 
 DEPENDENCIES
   github-pages
+  jekyll
+  jekyll-feed
+  jekyll-gist
+  jekyll-include-cache
+  jekyll-paginate
+  jekyll-seo-tag
+  jekyll-sitemap
 
 BUNDLED WITH
    2.0.2
