@@ -1,36 +1,36 @@
-theme                    : minimal-mistakes-jekyll
-minimal_mistakes_skin    : "default"
+remote_theme              : "mmistakes/minimal-mistakes@4.17.1"
+minimal_mistakes_skin     : "default"
 
-permalink: /:categories/:title/
-paginate: 5 # amount of posts to show
-paginate_path: /page:num/
-timezone: PL # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+permalink                 : /:categories/:title/
+paginate                  : 5 # amount of posts to show
+paginate_path             : /page:num/
+timezone                  : PL # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 # Site Settings
-locale                   : "en-US"
-title                    : "sygnowskip.github.io"
-title_separator          : "|"
-subtitle                 : # site tagline that appears below site title in masthead
-name                     : "Paweł Sygnowski"
-description              : "Architecture, design patterns and programming"
-url                      : "https://sygnowskip.github.io/" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
-baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
-teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
-logo                     : # path of logo image to display in the masthead, e.g. "/assets/images/88x88.png"
-masthead_title           : # overrides the website title displayed in the masthead, use " " for no title
-# breadcrumbs            : false # true, false (default)
-words_per_minute         : 200
-search                   : true #, false (default)
-search_full_content      : true #, false (default)
+locale                    : "en-US"
+title                     : "sygnowskip.github.io"
+title_separator           : "|"
+subtitle                  : # site tagline that appears below site title in masthead
+name                      : "Paweł Sygnowski"
+description               : "Architecture, design patterns and programming"
+url                       : "https://sygnowskip.github.io/" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+baseurl                   : # the subpath of your site, e.g. "/blog"
+repository                : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+teaser                    : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
+logo                      : # path of logo image to display in the masthead, e.g. "/assets/images/88x88.png"
+masthead_title            : # overrides the website title displayed in the masthead, use " " for no title
+# breadcrumbs             : false # true, false (default)
+words_per_minute          : 200
+search                    : true #, false (default)
+search_full_content       : true #, false (default)
 
 
 # Site Author
 author:
-  name             : "Paweł Sygnowski"
-  avatar           : "/assets/images/ninja.jpg"
-  bio              : ".NET Developer / Architect"
-  location         : "Warsaw"
+  name                    : "Paweł Sygnowski"
+  avatar                  : "/assets/images/ninja.jpg"
+  bio                     : ".NET Developer / Architect"
+  location                : "Warsaw"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
@@ -67,7 +67,7 @@ kramdown:
   toc_levels: 1..6
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
-  
+
 compress_html:
   clippings: all
   ignore:
