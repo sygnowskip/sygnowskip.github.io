@@ -18,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Upgrader\" />
+    <Reference Include="dbup-core">
+      <HintPath>C:\Users\sygno\.nuget\packages\dbup-core\4.2.0\lib\netstandard2.0\dbup-core.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

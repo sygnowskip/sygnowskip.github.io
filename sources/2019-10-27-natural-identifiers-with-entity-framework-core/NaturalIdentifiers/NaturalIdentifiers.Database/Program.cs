@@ -1,12 +1,20 @@
-﻿using System;
+﻿using Common.Database;
+using DbUp;
+using Microsoft.Extensions.Logging;
 
 namespace NaturalIdentifiers.Database
 {
-    class Program
+    public class DatabaseUpgrader
     {
-        static void Main(string[] args)
+        public static bool Execute(string connectionString, ILogger<DatabaseUpgrader> logger)
         {
-            Console.WriteLine("Hello World!");
+            return DeployChanges.To
+                .SqlDatabase(connectionString)
+                .WithScriptsEmbeddedInAssembly(typeof(DatabaseUpgrader).Assembly)
+                .LogTo(UpgradeLog<DatabaseUpgrader>.CreateFor(logger))
+                .Build()
+                .PerformUpgrade()
+                .Successful;
         }
     }
 }
