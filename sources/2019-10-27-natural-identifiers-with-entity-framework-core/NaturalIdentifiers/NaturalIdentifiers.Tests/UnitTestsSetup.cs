@@ -8,6 +8,7 @@ using Common.Docker.Resources;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NaturalIdentifiers.Database;
 using NUnit.Framework;
 
 namespace NaturalIdentifiers.Tests
@@ -41,11 +42,11 @@ namespace NaturalIdentifiers.Tests
             Task.WaitAll(
                 mssqlAwaiter.WaitForConnectionAsync(connectionString.ToMasterDatabase()));
             
-            var logger = _serviceProvider.GetService<ILogger<DatabaseCreator>>();
-            
             await DatabaseCreator
-                .WithConnectionString(connectionString, logger)
+                .WithConnectionString(connectionString, _serviceProvider.GetService<ILogger<DatabaseCreator>>())
                 .CreateAsync();
+
+            DatabaseUpgrader.Execute(connectionString, _serviceProvider.GetService<ILogger<DatabaseUpgrader>>());
         }
 
         [OneTimeTearDown]
