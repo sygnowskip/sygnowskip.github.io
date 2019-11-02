@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NaturalIdentifiers.Database;
+using NaturalIdentifiers.Tests.Tools;
 using NUnit.Framework;
 
 namespace NaturalIdentifiers.Tests

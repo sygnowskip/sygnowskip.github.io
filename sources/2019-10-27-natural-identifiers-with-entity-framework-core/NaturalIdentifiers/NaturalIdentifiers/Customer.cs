@@ -22,6 +22,7 @@ namespace NaturalIdentifiers
             Address = address;
         }
 
+
         protected Customer()
         {
         }
@@ -31,9 +32,14 @@ namespace NaturalIdentifiers
         public string LastName { get; private set; }
         public Address Address { get; private set; }
 
-        public static Customer Create(string firstName, string lastName)
+        public void ChangeFirstName(string firstName)
         {
-            return new Customer(CustomerId.New(), firstName, lastName, null);
+            FirstName = firstName;
+        }
+
+        public static Customer Create(string firstName, string lastName, Address address)
+        {
+            return new Customer(CustomerId.New(), firstName, lastName, address);
         }
     }
 

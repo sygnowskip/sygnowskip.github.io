@@ -26,24 +26,31 @@ namespace NaturalIdentifiers.EntityFrameworkCore
             var underlyingModelType = UnwrapNullableType(modelClrType);
             var underlyingProviderType = UnwrapNullableType(providerClrType);
 
-            if (underlyingProviderType == null || underlyingProviderType == typeof(Guid))
+            if (IsIdentifierCompatibleWithProvider<Identifier, Guid>())
             {
-                var isIdentifier = typeof(Identifier).IsAssignableFrom(underlyingModelType);
-                if (isIdentifier)
-                {
-                    var converterType = typeof(IdentifierValueConverter<>).MakeGenericType(underlyingModelType);
+                yield return GetOrAddIdentifier<Guid>(typeof(IdentifierValueConverter<>), modelClrType, underlyingModelType);
+            }
 
-                    yield return _converters.GetOrAdd((underlyingModelType, typeof(Guid)), _ =>
-                    {
-                        return new ValueConverterInfo(
-                            modelClrType: modelClrType,
-                            providerClrType: typeof(Guid),
-                            factory: valueConverterInfo => (ValueConverter)Activator.CreateInstance(converterType, valueConverterInfo.MappingHints));
-                    });
-                }
+            bool IsIdentifierCompatibleWithProvider<TIdentifier, TProviderType>()
+            {
+                return (underlyingProviderType == null || underlyingProviderType == typeof(TProviderType))
+                       && typeof(TIdentifier).IsAssignableFrom(underlyingModelType);
             }
         }
 
         private static Type UnwrapNullableType(Type type) => type == null ? null : Nullable.GetUnderlyingType(type) ?? type;
+
+        private ValueConverterInfo GetOrAddIdentifier<TProviderType>(Type valueConverterType, Type modelClrType, Type underlyingModelType)
+        {
+            var converterType = valueConverterType.MakeGenericType(underlyingModelType);
+
+            return _converters.GetOrAdd((underlyingModelType, typeof(TProviderType)), _ =>
+            {
+                return new ValueConverterInfo(
+                    modelClrType: modelClrType,
+                    providerClrType: typeof(TProviderType),
+                    factory: valueConverterInfo => (ValueConverter)Activator.CreateInstance(converterType, valueConverterInfo.MappingHints));
+            });
+        }
     }
 }

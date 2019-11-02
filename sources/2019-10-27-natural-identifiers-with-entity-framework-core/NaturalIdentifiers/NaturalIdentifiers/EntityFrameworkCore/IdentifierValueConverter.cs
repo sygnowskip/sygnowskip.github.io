@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace NaturalIdentifiers.EntityFrameworkCore
 {
-    public class IdentifierValueConverter<TIdentifier> : ValueConverter<TIdentifier, Guid>
+    internal class IdentifierValueConverter<TIdentifier> : ValueConverter<TIdentifier, Guid>
         where TIdentifier : Identifier
     {
         public IdentifierValueConverter(ConverterMappingHints mappingHints = null)
@@ -11,6 +11,6 @@ namespace NaturalIdentifiers.EntityFrameworkCore
         {
         }
 
-        private static TIdentifier Create(Guid id) => Activator.CreateInstance(typeof(TIdentifier), id) as TIdentifier;
+        private static TIdentifier Create(Guid id) => IdentifierActivator.Create(typeof(TIdentifier), id) as TIdentifier;
     }
 }
