@@ -1,0 +1,442 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Natural identifiers in your domain (with Entity Framework Core) | sygnowskip.github.io</title>
+<meta name="description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+
+
+  <meta name="author" content="Paweł Sygnowski">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="sygnowskip.github.io">
+<meta property="og:title" content="Natural identifiers in your domain (with Entity Framework Core)">
+<meta property="og:url" content="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core/">
+
+
+  <meta property="og:description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-11-03T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Paweł Sygnowski",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="sygnowskip.github.io Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          sygnowskip.github.io
+          
+        </a>
+        <ul class="visible-links"></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Natural identifiers in your domain (with Entity Framework Core)">
+    <meta itemprop="description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+    <meta itemprop="datePublished" content="November 03, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Natural identifiers in your domain (with Entity Framework Core)
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>How often do you see code like this in your applications?</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPaymentService</span> <span class="p">{</span>
+  <span class="c1">/// &lt;summary&gt;</span>
+  <span class="c1">/// Method for creating Payment for specific Order</span>
+  <span class="c1">/// &lt;/summary&gt;</span>
+  <span class="c1">/// &lt;param name="orderId"&gt;Order identifier&lt;/param&gt;</span>
+  <span class="c1">/// &lt;returns&gt;Payment identifier&lt;/returns&gt;</span>
+  <span class="kt">long</span> <span class="nf">CreatePayment</span><span class="p">(</span><span class="kt">long</span> <span class="n">orderId</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>What’s wrong with them?</p>
+
+<ul>
+  <li>any <code class="language-plaintext highlighter-rouge">long</code> value could be passed as their arguments</li>
+  <li><code class="language-plaintext highlighter-rouge">long</code> as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)</li>
+  <li>when code changes, the comment needs to be changed or removed (or will become not related to code)</li>
+</ul>
+
+<h2 id="how-could-we-improve-this-code">How could we improve this code?</h2>
+
+<p>In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).</p>
+
+<p>In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.</p>
+
+<p>So, we could change our code to something like this:</p>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPaymentService</span> <span class="p">{</span>
+  <span class="n">PaymentId</span> <span class="nf">CreatePayment</span><span class="p">(</span><span class="n">OrderId</span> <span class="n">orderId</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Why this code is better?</p>
+
+<ul>
+  <li>self-documenting code (input and output is clearly described by types)</li>
+  <li>static type checking at compile time (not able to pass <code class="language-plaintext highlighter-rouge">CustomerId</code> as <code class="language-plaintext highlighter-rouge">OrderId</code>)</li>
+</ul>
+
+<h2 id="how-to-configure-it-in-entity-framework-core">How to configure it in Entity Framework Core?</h2>
+
+<p><em>Described solution is working fine on EF Core 2.2 / 3.0</em></p>
+
+<p>Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.</p>
+
+<p>Configuration of Order class in EF Core:</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderId</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="n">Guid</span> <span class="n">Value</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Order</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="n">OrderId</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">[...]</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OrderConfiguration</span> <span class="p">:</span> <span class="n">IEntityTypeConfiguration</span><span class="p">&lt;</span><span class="n">Order</span><span class="p">&gt;</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Configure</span><span class="p">(</span><span class="n">EntityTypeBuilder</span><span class="p">&lt;</span><span class="n">Order</span><span class="p">&gt;</span> <span class="n">builder</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">builder</span><span class="p">.</span><span class="nf">ToTable</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">Order</span><span class="p">));</span>
+    <span class="n">builder</span><span class="p">.</span><span class="nf">HasKey</span><span class="p">(</span><span class="n">order</span> <span class="p">=&gt;</span> <span class="n">order</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Code execution will end with exception like:</p>
+
+<blockquote>
+  <p>System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.</p>
+</blockquote>
+
+<p>There are few things that needs to be done before EF Core understands how to handle our identities correctly:</p>
+
+<ol>
+  <li>Identifiers have to implement following methods / interfaces:
+    <ol>
+      <li><code class="language-plaintext highlighter-rouge">Equals</code> / <code class="language-plaintext highlighter-rouge">GetHashCode</code></li>
+      <li><code class="language-plaintext highlighter-rouge">IComparable</code></li>
+      <li><code class="language-plaintext highlighter-rouge">== / !=</code> operators</li>
+    </ol>
+  </li>
+  <li>Custom implementation for <code class="language-plaintext highlighter-rouge">IValueConverterSelector</code> and <code class="language-plaintext highlighter-rouge">ValueConverter&lt;TIdentifier, TType&gt;</code></li>
+  <li>Replacing internal EF Core implementation of <code class="language-plaintext highlighter-rouge">IValueConverterSelector</code> with our custom implementation</li>
+</ol>
+
+<p>After all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.</p>
+
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderService</span> <span class="p">:</span> <span class="n">IOrderService</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="n">Order</span> <span class="nf">GetOrder</span><span class="p">(</span><span class="n">OrderId</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">dbContext</span><span class="p">.</span><span class="n">Orders</span><span class="p">.</span><span class="nf">SingleOrDefault</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">c</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="n">id</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<p><em>There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.</em></p>
+
+<p><em>So you need to use Guid (e.g. with <a href="https://www.nuget.org/packages/NewId/">NewId</a> library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.</em></p>
+
+<hr />
+
+<p>Code with examples could be found on my <a href="https://github.com/sygnowskip/sygnowskip.github.io/tree/master/sources/2019-11-03-natural-identifiers-with-entity-framework-core">GitHub</a></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#domain-driven-design" class="page__taxonomy-item" rel="tag">domain driven design</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#domain" class="page__taxonomy-item" rel="tag">domain</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#entity-framework" class="page__taxonomy-item" rel="tag">entity framework</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#natural-identifiers" class="page__taxonomy-item" rel="tag">natural identifiers</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#domain" class="page__taxonomy-item" rel="tag">domain</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-11-03T00:00:00+00:00">November 03, 2019</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Natural+identifiers+in+your+domain+%28with+Entity+Framework+Core%29%20http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+            
+      </div>
+    </div>
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/sygnowskip" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/pawe%C5%82-sygnowski-01162b83/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2019 Paweł Sygnowski. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>
