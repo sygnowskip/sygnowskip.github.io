@@ -22,7 +22,11 @@ namespace NaturalIdentifiers.Tests.Tools
         }
 
         public void Dispose() { }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="categoryName">Test</param>
+        /// <returns>Test</returns>
         public ILogger CreateLogger(string categoryName)
         {
             return _logger;
