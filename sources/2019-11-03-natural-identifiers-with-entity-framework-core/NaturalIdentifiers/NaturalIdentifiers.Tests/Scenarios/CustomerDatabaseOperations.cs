@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace NaturalIdentifiers.Tests.Scenarios
 {
     [TestFixture]
-    public class DatabaseOperations
+    public class CustomerDatabaseOperations
     {
         private readonly IServiceProvider _serviceProvider = ServiceProviderBuilder.Build();
         private Customer CreateExampleCustomer() => Customer.Create("Luke", "Skywalker", Address.Create("Tatooine", "R2-D2", "Galaxy"));

@@ -1,5 +1,6 @@
 ﻿using System;
 using NaturalIdentifiers.EntityFrameworkCore;
+using NaturalIdentifiers.EntityFrameworkCore.Guid;
 
 namespace NaturalIdentifiers
 {
@@ -8,8 +9,6 @@ namespace NaturalIdentifiers
         public CustomerId(Guid value) : base(value)
         {
         }
-
-        public static CustomerId New() => new CustomerId(Guid.NewGuid());
     }
 
     public class Customer
@@ -39,7 +38,7 @@ namespace NaturalIdentifiers
 
         public static Customer Create(string firstName, string lastName, Address address)
         {
-            return new Customer(CustomerId.New(), firstName, lastName, address);
+            return new Customer(Identifier.New<CustomerId>(), firstName, lastName, address);
         }
     }
 

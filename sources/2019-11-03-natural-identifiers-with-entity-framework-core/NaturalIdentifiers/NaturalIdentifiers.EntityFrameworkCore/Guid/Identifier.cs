@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using NaturalIdentifiers.Common;
-using NaturalIdentifiers.EntityFrameworkCore;
+using MassTransit;
 
-namespace NaturalIdentifiers
+namespace NaturalIdentifiers.EntityFrameworkCore.Guid
 {
     public class Identifier : ValueObject, IComparable
     {
-        protected Identifier(Guid value)
+        protected Identifier(System.Guid value)
         {
             Value = value;
         }
 
-        public Guid Value { get; private set; }
+        public System.Guid Value { get; private set; }
 
         public static TIdentifier New<TIdentifier>() where TIdentifier : Identifier
-            => IdentifierActivator.Create(typeof(TIdentifier), Guid.NewGuid()) as TIdentifier;
+            => IdentifierActivator.Create(typeof(TIdentifier), NewId.NextGuid()) as TIdentifier;
 
-        public static implicit operator Guid(Identifier id) => id.Value;
+        public static implicit operator System.Guid(Identifier id) => id.Value;
 
         public override string ToString() => Value.ToString();
 
