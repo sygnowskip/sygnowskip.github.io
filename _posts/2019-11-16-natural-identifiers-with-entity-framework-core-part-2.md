@@ -71,4 +71,8 @@ public class OrderService : IOrderService {
 
 ---
 
+*There is one disadvantage of this solution - EF Core migrations are not working correctly, so you need to use solutions like [DbUp](https://www.nuget.org/packages/dbup/) and SQL scripts.*
+
+---
+
 Code with examples could be found on my [GitHub](https://github.com/sygnowskip/sygnowskip.github.io/tree/master/sources/2019-11-03-natural-identifiers-with-entity-framework-core)
