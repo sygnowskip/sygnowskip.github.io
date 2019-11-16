@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using NaturalIdentifiers.Common;
-using NaturalIdentifiers.EntityFrameworkCore;
+using MassTransit;
 
-namespace NaturalIdentifiers
+namespace NaturalIdentifiers.EntityFrameworkCore.Numeric
 {
     public class Identifier : ValueObject, IComparable
     {
-        protected Identifier(Guid value)
+        protected Identifier(long value)
         {
             Value = value;
         }
 
-        public Guid Value { get; private set; }
-
-        public static TIdentifier New<TIdentifier>() where TIdentifier : Identifier
-            => IdentifierActivator.Create(typeof(TIdentifier), Guid.NewGuid()) as TIdentifier;
-
-        public static implicit operator Guid(Identifier id) => id.Value;
+        public long Value { get; private set; }
 
         public override string ToString() => Value.ToString();
 

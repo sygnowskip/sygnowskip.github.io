@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace NaturalIdentifiers.Common
+namespace NaturalIdentifiers.EntityFrameworkCore
 {
     public abstract class ValueObject
     {

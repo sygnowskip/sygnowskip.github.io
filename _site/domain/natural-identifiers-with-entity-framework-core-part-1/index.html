@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Natural identifiers in your domain (with Entity Framework Core) | sygnowskip.github.io</title>
-<meta name="description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+<!-- begin _includes/seo.html --><title>Natural identifiers in your domain (with Entity Framework Core) - generated on server side | sygnowskip.github.io</title>
+<meta name="description" content="  Part 1 is about configuring EF Core with server side generated identifiers, but there is also a part 2 where a configuration for database generated identifiers is explainedHow often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries (will be evaluated on SQL with WHERE clause).public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is also a second part of this article with proper configuration for database side generated identities - part 2Code with examples could be found on my GitHub">
 
 
   <meta name="author" content="Paweł Sygnowski">
@@ -19,11 +19,11 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="sygnowskip.github.io">
-<meta property="og:title" content="Natural identifiers in your domain (with Entity Framework Core)">
-<meta property="og:url" content="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core/">
+<meta property="og:title" content="Natural identifiers in your domain (with Entity Framework Core) - generated on server side">
+<meta property="og:url" content="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core-part-1/">
 
 
-  <meta property="og:description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+  <meta property="og:description" content="  Part 1 is about configuring EF Core with server side generated identifiers, but there is also a part 2 where a configuration for database generated identifiers is explainedHow often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries (will be evaluated on SQL with WHERE clause).public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is also a second part of this article with proper configuration for database side generated identities - part 2Code with examples could be found on my GitHub">
 
 
 
@@ -38,7 +38,7 @@
 
 
 
-<link rel="canonical" href="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core/">
+<link rel="canonical" href="http://localhost:4000/domain/natural-identifiers-with-entity-framework-core-part-1/">
 
 
 
@@ -153,15 +153,15 @@
   
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Natural identifiers in your domain (with Entity Framework Core)">
-    <meta itemprop="description" content="How often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.So you need to use Guid (e.g. with NewId library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.Code with examples could be found on my GitHub">
+    <meta itemprop="headline" content="Natural identifiers in your domain (with Entity Framework Core) - generated on server side">
+    <meta itemprop="description" content="  Part 1 is about configuring EF Core with server side generated identifiers, but there is also a part 2 where a configuration for database generated identifiers is explainedHow often do you see code like this in your applications?public interface IPaymentService {  /// &lt;summary&gt;  /// Method for creating Payment for specific Order  /// &lt;/summary&gt;  /// &lt;param name=&quot;orderId&quot;&gt;Order identifier&lt;/param&gt;  /// &lt;returns&gt;Payment identifier&lt;/returns&gt;  long CreatePayment(long orderId);}What’s wrong with them?  any long value could be passed as their arguments  long as a return type is not descriptive and understandable (usually, you need to check details of the implementation or check the documentation)  when code changes, the comment needs to be changed or removed (or will become not related to code)How could we improve this code?In the Domain Driven Design there is a concept of entities that represent domain objects and are primarily defined by their identity (you could find more information about DDD in other blogs / books).In our example, we could identify two different entities: Order and Payment. Both of them should have separated identifiers that are immutable and globally unique.So, we could change our code to something like this:public interface IPaymentService {  PaymentId CreatePayment(OrderId orderId);}Why this code is better?  self-documenting code (input and output is clearly described by types)  static type checking at compile time (not able to pass CustomerId as OrderId)How to configure it in Entity Framework Core?Described solution is working fine on EF Core 2.2 / 3.0Main problem with solution described above is to configure EF Core to handle it properly and out of the box for all our domain entities and identifiers.Configuration of Order class in EF Core:public class OrderId {  public Guid Value { get; private set; }}public class Order {  public OrderId Id { get; private set; }  [...]}public class OrderConfiguration : IEntityTypeConfiguration&lt;Order&gt; {  public void Configure(EntityTypeBuilder&lt;Order&gt; builder)  {    builder.ToTable(nameof(Order));    builder.HasKey(order =&gt; order.Id);  }}Code execution will end with exception like:  System.InvalidOperationException : The property ‘Order.Id’ is of type ‘OrderId’ which is not supported by current database provider. Either change the property CLR type or ignore the property using the ‘[NotMapped]’ attribute or by using ‘EntityTypeBuilder.Ignore’ in ‘OnModelCreating’.There are few things that needs to be done before EF Core understands how to handle our identities correctly:  Identifiers have to implement following methods / interfaces:          Equals / GetHashCode      IComparable      == / != operators        Custom implementation for IValueConverterSelector and ValueConverter&lt;TIdentifier, TType&gt;  Replacing internal EF Core implementation of IValueConverterSelector with our custom implementationAfter all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries (will be evaluated on SQL with WHERE clause).public class OrderService : IOrderService {  public Order GetOrder(OrderId id) {    return dbContext.Orders.SingleOrDefault(c =&gt; c.Id == id);  }}There is also a second part of this article with proper configuration for database side generated identities - part 2Code with examples could be found on my GitHub">
     <meta itemprop="datePublished" content="November 03, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Natural identifiers in your domain (with Entity Framework Core)
+          <h1 id="page-title" class="page__title" itemprop="headline">Natural identifiers in your domain (with Entity Framework Core) - generated on server side
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -178,7 +178,11 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>How often do you see code like this in your applications?</p>
+        <blockquote>
+  <p><em>Part 1 is about configuring EF Core with server side generated identifiers, but there is also a part 2 where a configuration for database generated identifiers is explained</em></p>
+</blockquote>
+
+<p>How often do you see code like this in your applications?</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPaymentService</span> <span class="p">{</span>
   <span class="c1">/// &lt;summary&gt;</span>
@@ -264,7 +268,7 @@
   <li>Replacing internal EF Core implementation of <code class="language-plaintext highlighter-rouge">IValueConverterSelector</code> with our custom implementation</li>
 </ol>
 
-<p>After all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.</p>
+<p>After all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries (will be evaluated on SQL with WHERE clause).</p>
 
 <div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderService</span> <span class="p">:</span> <span class="n">IOrderService</span> <span class="p">{</span>
   <span class="k">public</span> <span class="n">Order</span> <span class="nf">GetOrder</span><span class="p">(</span><span class="n">OrderId</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
@@ -273,11 +277,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<hr />
-
-<p><em>There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we’re not able to use autoincrement database side identities.</em></p>
-
-<p><em>So you need to use Guid (e.g. with <a href="https://www.nuget.org/packages/NewId/">NewId</a> library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.</em></p>
+<p>There is also a second part of this article with proper configuration for database side generated identities - <a href="/domain/natural-identifiers-with-entity-framework-core-part-2/">part 2</a></p>
 
 <hr />
 
@@ -314,7 +314,11 @@
     
       
       
-      <a href="/tags/#natural-identifiers" class="page__taxonomy-item" rel="tag">natural identifiers</a>
+      <a href="/tags/#natural-identifiers" class="page__taxonomy-item" rel="tag">natural identifiers</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#server-side-generated" class="page__taxonomy-item" rel="tag">server side generated</a>
     
     </span>
   </p>
@@ -349,15 +353,25 @@
       <section class="page__share">
   
 
-  <a href="https://twitter.com/intent/tweet?text=Natural+identifiers+in+your+domain+%28with+Entity+Framework+Core%29%20http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?text=Natural+identifiers+in+your+domain+%28with+Entity+Framework+Core%29+-+generated+on+server+side%20http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core-part-1%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core-part-1%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fdomain%2Fnatural-identifiers-with-entity-framework-core-part-1%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
       
+  <nav class="pagination">
+    
+      <a href="#" class="pagination--pager disabled">Previous</a>
+    
+    
+      <a href="/domain/natural-identifiers-with-entity-framework-core-part-2/" class="pagination--pager" title="Natural identifiers in your domain (with Entity Framework Core) - generated by database
+">Next</a>
+    
+  </nav>
+
     </div>
 
     
@@ -370,9 +384,37 @@
       <div class="grid__wrapper">
         
           
-            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/domain/natural-identifiers-with-entity-framework-core-part-2/" rel="permalink">Natural identifiers in your domain (with Entity Framework Core) - generated by database
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">
+  Part 2 is about configuring EF Core with databse side generated identifiers, but there is also a part 1 where a configuration for server side generated id...</p>
+  </article>
+</div>
+
+        
       </div>
     </div>
+  
   
 </div>
 

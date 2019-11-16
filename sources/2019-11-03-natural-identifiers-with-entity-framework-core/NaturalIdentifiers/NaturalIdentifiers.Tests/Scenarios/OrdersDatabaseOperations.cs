@@ -9,20 +9,21 @@ using NUnit.Framework;
 namespace NaturalIdentifiers.Tests.Scenarios
 {
     [TestFixture]
-    public class DatabaseOperations
+    public class OrdersDatabaseOperations
     {
+
         private readonly IServiceProvider _serviceProvider = ServiceProviderBuilder.Build();
-        private Customer CreateExampleCustomer() => Customer.Create("Luke", "Skywalker", Address.Create("Tatooine", "R2-D2", "Galaxy"));
+        private Order CreateExampleOrder() => Order.Create("Example order", OrderCustomer.Create("John", "Smith"));
 
         [Test]
-        public void ShouldCreateCustomerInDatabase()
+        public void ShouldCreateOrderInDatabase()
         {
             int? result = null;
-            var customer = CreateExampleCustomer();
+            var order = CreateExampleOrder();
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                dbContext.Add(customer);
+                dbContext.Add(order);
                 result = dbContext.SaveChanges();
             }
 
@@ -30,43 +31,44 @@ namespace NaturalIdentifiers.Tests.Scenarios
             result.Should().Be(1, "There should be one entry written to database (INSERT)");
         }
 
+
         [Test]
-        public void ShouldReadCustomerFromDatabase()
+        public void ShouldReadOrderFromDatabase()
         {
-            var customer = CreateExampleCustomer();
-            Customer readCustomer = null;
+            var order = CreateExampleOrder();
+            Order readOrder = null;
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                dbContext.Add(customer);
+                dbContext.Add(order);
                 dbContext.SaveChanges();
             }
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                readCustomer = dbContext.Customers.SingleOrDefault(c => c.Id == customer.Id);
+                readOrder = dbContext.Orders.SingleOrDefault(c => c.Id == order.Id);
             }
 
-            readCustomer.Should().NotBeNull();
-            readCustomer.Should().BeEquivalentTo(customer, "Object saved in database should be equal to object created in runtime");
+            readOrder.Should().NotBeNull();
+            readOrder.Should().BeEquivalentTo(order, "Object saved in database should be equal to object created in runtime");
         }
 
         [Test]
-        public void ShouldUpdateCustomerInDatabase()
+        public void ShouldUpdateOrderInDatabase()
         {
-            var customer = CreateExampleCustomer();
+            var order = CreateExampleOrder();
             int? result = null;
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                dbContext.Add(customer);
+                dbContext.Add(order);
                 dbContext.SaveChanges();
             }
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                var customerToUpdate = dbContext.Customers.SingleOrDefault(c => c.Id == customer.Id);
-                customerToUpdate?.ChangeFirstName("Anakin");
+                var orderToUpdate = dbContext.Orders.SingleOrDefault(c => c.Id == order.Id);
+                orderToUpdate?.ChangeDescription("New description");
                 result = dbContext.SaveChanges();
             }
 
@@ -75,26 +77,26 @@ namespace NaturalIdentifiers.Tests.Scenarios
         }
 
         [Test]
-        public void ShouldUpdateMultipleCustomersInDatabase()
+        public void ShouldUpdateMultipleOrdersInDatabase()
         {
-            var firstCustomer = CreateExampleCustomer();
-            var secondCustomer = CreateExampleCustomer();
+            var firstOrder = CreateExampleOrder();
+            var secondOrder = CreateExampleOrder();
             int? result = null;
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                dbContext.Add(firstCustomer);
-                dbContext.Add(secondCustomer);
+                dbContext.Add(firstOrder);
+                dbContext.Add(secondOrder);
                 dbContext.SaveChanges();
             }
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                var firstCustomerToUpdate = dbContext.Customers.SingleOrDefault(c => c.Id == firstCustomer.Id);
-                firstCustomerToUpdate?.ChangeFirstName("Anakin");
+                var firstOrderToUpdate = dbContext.Orders.SingleOrDefault(c => c.Id == firstOrder.Id);
+                firstOrderToUpdate?.ChangeDescription("New description");
 
-                var secondCustomerToUpdate = dbContext.Customers.SingleOrDefault(c => c.Id == secondCustomer.Id);
-                secondCustomerToUpdate?.ChangeFirstName("Leia");
+                var secondOrderToUpdate = dbContext.Orders.SingleOrDefault(c => c.Id == secondOrder.Id);
+                secondOrderToUpdate?.ChangeDescription("New description");
                 result = dbContext.SaveChanges();
             }
 
@@ -103,27 +105,27 @@ namespace NaturalIdentifiers.Tests.Scenarios
         }
 
         [Test]
-        public void ShouldDeleteCustomerFromDatabase()
+        public void ShouldDeleteOrderFromDatabase()
         {
             int? result = null;
-            var customer = CreateExampleCustomer();
+            var order = CreateExampleOrder();
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                dbContext.Add(customer);
+                dbContext.Add(order);
                 dbContext.SaveChanges();
             }
 
             using (var dbContext = _serviceProvider.GetService<ApplicationDbContext>())
             {
-                var customerToDelete = dbContext.Customers.SingleOrDefault(c => c.Id == customer.Id);
-                if (customerToDelete != null)
+                var orderToDelete = dbContext.Orders.SingleOrDefault(c => c.Id == order.Id);
+                if (orderToDelete != null)
                 {
-                    dbContext.Customers.Remove(customerToDelete);
+                    dbContext.Orders.Remove(orderToDelete);
                     result = dbContext.SaveChanges();
                 }
             }
-            
+
             result.Should().NotBeNull();
             result.Should().Be(1, "There should be one entry written to database (DELETE)");
         }

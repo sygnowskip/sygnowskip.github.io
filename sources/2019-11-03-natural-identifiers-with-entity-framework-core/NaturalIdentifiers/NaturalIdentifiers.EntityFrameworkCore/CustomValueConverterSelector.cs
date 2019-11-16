@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace NaturalIdentifiers.EntityFrameworkCore
+namespace NaturalIdentifiers.EntityFrameworkCore.Guid
 {
     public class CustomValueConverterSelector : ValueConverterSelector
     {
@@ -26,9 +26,13 @@ namespace NaturalIdentifiers.EntityFrameworkCore
             var underlyingModelType = UnwrapNullableType(modelClrType);
             var underlyingProviderType = UnwrapNullableType(providerClrType);
 
-            if (IsIdentifierCompatibleWithProvider<Identifier, Guid>())
+            if (IsIdentifierCompatibleWithProvider<Guid.Identifier, System.Guid>())
             {
-                yield return GetOrAddIdentifier<Guid>(typeof(IdentifierValueConverter<>), modelClrType, underlyingModelType);
+                yield return GetOrAddIdentifier<System.Guid>(typeof(Guid.IdentifierValueConverter<>), modelClrType, underlyingModelType);
+            }
+            if (IsIdentifierCompatibleWithProvider<Numeric.Identifier, long>())
+            {
+                yield return GetOrAddIdentifier<long>(typeof(Numeric.IdentifierValueConverter<>), modelClrType, underlyingModelType);
             }
 
             bool IsIdentifierCompatibleWithProvider<TIdentifier, TProviderType>()
@@ -49,7 +53,7 @@ namespace NaturalIdentifiers.EntityFrameworkCore
                 return new ValueConverterInfo(
                     modelClrType: modelClrType,
                     providerClrType: typeof(TProviderType),
-                    factory: valueConverterInfo => (ValueConverter)Activator.CreateInstance(converterType, valueConverterInfo.MappingHints));
+                    factory: valueConverterInfo => (ValueConverter)Activator.CreateInstance(converterType));
             });
         }
     }
