@@ -8,4 +8,8 @@
     <ProjectReference Include="..\NaturalIdentifiers.EntityFrameworkCore\NaturalIdentifiers.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

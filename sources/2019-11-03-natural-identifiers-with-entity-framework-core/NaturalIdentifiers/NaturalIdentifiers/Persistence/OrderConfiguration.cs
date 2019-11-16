@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.SqlServer.Metadata.Internal;
+using NaturalIdentifiers.EntityFrameworkCore.Annotations;
 
 namespace NaturalIdentifiers.Persistence
 {
@@ -13,19 +12,10 @@ namespace NaturalIdentifiers.Persistence
 
             builder.HasKey(order => order.Id);
             builder.Property(order => order.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityColumn();
 
             builder.Property(order => order.Description);
             builder.OwnsOne(order => order.Customer);
-        }
-    }
-
-    internal static class PropertyTypeBuilderExtension
-    {
-        public static PropertyBuilder<T> UseIdentityColumn<T>(this PropertyBuilder<T> builder)
-        {
-            builder.Metadata.SetAnnotation(SqlServerAnnotationNames.ValueGenerationStrategy, SqlServerValueGenerationStrategy.IdentityColumn);
-            return builder;
         }
     }
 }

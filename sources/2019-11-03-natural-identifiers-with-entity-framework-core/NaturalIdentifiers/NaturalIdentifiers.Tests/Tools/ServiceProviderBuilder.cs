@@ -3,10 +3,12 @@ using Common.Docker;
 using Common.Tests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NaturalIdentifiers.EntityFrameworkCore.Annotations;
 using NaturalIdentifiers.EntityFrameworkCore.Guid;
 using NaturalIdentifiers.Persistence;
 using ConfigurationProvider = Common.Configuration.ConfigurationProvider;
@@ -38,6 +40,7 @@ namespace NaturalIdentifiers.Tests.Tools
             builder
                 .UseSqlServer(configuration.GetConnectionString(Consts.ConnectionStringName))
                 .ReplaceService<IValueConverterSelector, CustomValueConverterSelector>()
+                .ReplaceService<IMigrationsAnnotationProvider, CustomAnnotationProvider>()
                 .ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
 
             if (loggerFactory != null)
