@@ -1,14 +1,17 @@
 ---
-title: "Natural identifiers in your domain (with Entity Framework Core)"
+title: "Natural identifiers in your domain (with Entity Framework Core) - part 1"
 categories:
   - domain
 tags:
+  - server side generated
   - domain
   - domain driven design
   - entity framework
   - natural identifiers
 layout: single
 ---
+
+> *Part 1 is about configuring EF Core with server side generated identifiers, but there is also a part 2 where a configuration for database generated identifiers is explained*
 
 How often do you see code like this in your applications?
 
@@ -88,7 +91,7 @@ There are few things that needs to be done before EF Core understands how to han
 2. Custom implementation for `IValueConverterSelector` and `ValueConverter<TIdentifier, TType>`
 3. Replacing internal EF Core implementation of `IValueConverterSelector` with our custom implementation
 
-After all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries.
+After all those changes EF Core will be able to understand LinQ queries with our identities and translates it correctly to SQL queries (will be evaluated on SQL with WHERE clause).
 
 ```csharp
 public class OrderService : IOrderService {
@@ -98,11 +101,7 @@ public class OrderService : IOrderService {
 }
 ```
 
----
-
-*There is one disadvantage of this solution - all identifiers (Guid / long / int etc) have to be generated on server side and we're not able to use autoincrement database side identities.*
-
-*So you need to use Guid (e.g. with [NewId](https://www.nuget.org/packages/NewId/) library) or use HiLo mechanisms (or any other to generate long / int / string identifiers) in your code.*
+There is also a second part of this article with proper configuration for database side generated identities - [part 2](/domain/natural-identifiers-with-entity-framework-core-part-2/) 
 
 ---
 

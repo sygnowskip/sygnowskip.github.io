@@ -1,9 +1,7 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
-using NaturalIdentifiers.EntityFrameworkCore.Guid;
 
 namespace NaturalIdentifiers.EntityFrameworkCore.Numeric
 {
