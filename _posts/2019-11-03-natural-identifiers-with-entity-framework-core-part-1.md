@@ -1,5 +1,5 @@
 ---
-title: "Natural identifiers in your domain (with Entity Framework Core) - part 1"
+title: "Natural identifiers in your domain (with Entity Framework Core) - generated on server side"
 categories:
   - domain
 tags:
