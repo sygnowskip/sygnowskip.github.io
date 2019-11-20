@@ -68,14 +68,31 @@ public class OrderService : IOrderService {
   }
 }
 ```
----
 
-*There is one disadvantage of this solution - with current configuration EF Core migrations are not working correctly, so you need to use solutions like [DbUp](https://www.nuget.org/packages/dbup/) and SQL scripts.*
+## EF Core migrations
 
----
+To bring back EF Core migrations with support for natural identifiers you need to do this:
 
-*There is one disadvantage of this solution - EF Core migrations are not working correctly, so you need to use solutions like [DbUp](https://www.nuget.org/packages/dbup/) and SQL scripts.*
+1. Implement custom `UseIdentityColumn` method and store annotation for `SqlServerValueGenerationStrategy.IdentityColumn` under custom name to avoid EF Core type validations from `Microsoft.EntityFrameworkCore.SqlServerPropertyExtensions.CheckValueGenerationStrategy`
+2. Override `SqlServerMigrationsAnnotationProvider` and read your custom annotation from point above, when you find them, add an annotation for property with name `SqlServerAnnotationNames.Identity`
 
+After those points, every time when you will generate new migrations by EF Core mechanism, it will generate correct annotations and allows you to use database as a source for values of ID, e.g.:
+```csharp
+migrationBuilder.CreateTable(
+    name: "Order",
+    columns: table => new
+    {
+        Id = table.Column<long>(nullable: false)
+            .Annotation("SqlServer:Identity", "1, 1"),
+        Description = table.Column<string>(nullable: true),
+        Customer_FirstName = table.Column<string>(nullable: true),
+        Customer_LastName = table.Column<string>(nullable: true)
+    },
+    constraints: table =>
+    {
+        table.PrimaryKey("PK_Order", x => x.Id);
+    });
+```
 ---
 
 Code with examples could be found on my [GitHub](https://github.com/sygnowskip/sygnowskip.github.io/tree/master/sources/2019-11-03-natural-identifiers-with-entity-framework-core)
