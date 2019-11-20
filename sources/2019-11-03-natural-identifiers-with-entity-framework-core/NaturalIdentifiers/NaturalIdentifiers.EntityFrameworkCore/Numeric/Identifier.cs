@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MassTransit;
 
 namespace NaturalIdentifiers.EntityFrameworkCore.Numeric
 {

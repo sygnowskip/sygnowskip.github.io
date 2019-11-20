@@ -1,5 +1,4 @@
 ﻿using System;
-using NaturalIdentifiers.EntityFrameworkCore;
 using NaturalIdentifiers.EntityFrameworkCore.Guid;
 
 namespace NaturalIdentifiers
